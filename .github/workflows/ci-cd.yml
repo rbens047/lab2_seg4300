@@ -13,38 +13,51 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    # Checkout the repository code
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
+    # Set up Python environment (latest version)
     - name: Set up Python environment
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
-        python-version: '3.8'
+        python-version: '3.8'  # Update to the version of Python you need
 
+    # Install dependencies and other tools
     - name: Install dependencies
       run: |
-        pip install -r requirements.txt
-        pip install pytest  # Install pytest if not in requirements.txt
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt  # Install dependencies from requirements.txt
+        pip install pytest  # Ensure pytest is installed if not in requirements.txt
 
+    # Run tests
     - name: Run tests
       run: |
-        pytest --maxfail=1 --disable-warnings -q
+        pytest --maxfail=3 --disable-warnings -q  # Configure pytest for better error reporting
 
+    # Set up Docker Buildx for cross-platform builds (especially useful if you need cross-platform support)
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+      uses: docker/setup-buildx-action@v2
 
+    # Log in to Docker Hub using GitHub secrets
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
+    # Build the Docker image
     - name: Build Docker image
       run: |
-        docker build -t rbens047/app:latest .
+        docker build -t rbens047/app:latest .  
 
+    # Push the Docker image to Docker Hub
     - name: Push Docker image to Docker Hub
       run: |
-        docker push rbens047/app:latest
+        docker push rbens047/app:latest  
 
+    # Optional: Deploy or push to another platform (e.g., Kubernetes or AWS ECR)
+    # - name: Deploy to Kubernetes
+    #   run: |
+    #     kubectl apply -f deployment.yaml  # Add deployment details if needed
 
